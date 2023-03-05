@@ -1,10 +1,10 @@
-class Game{
-    constructor(){
+class Game {
+    constructor() {
         this.name = name;
         this.$zone = $('.elements');
         this.elements = [];
         this.player = this.generate(Player);
-        this.fruits = [Apple, Banana, Orange];
+        this.fruits = [Apple, Orange, Banana];
         this.counterForTimer = 0;
         this.points = 0;
         this.hp = 3;
@@ -13,11 +13,15 @@ class Game{
             m2: 0,
             s1: 0,
             s2: 0
-        }
+        };
         this.ended = false;
         this.pause = false;
         this.keyEvents();
     }
+    start() {
+        this.loop();
+    }
+
     keyEvents() {
         addEventListener('keydown', (e) => {
             if (e.key === "Escape") {
@@ -25,94 +29,109 @@ class Game{
             }
         })
     }
-    updateElements(){
-        this.elements.forEach(e => {
-            e.update();
-            e.draw();
-        })
-    }
-    generate(className) {
-        let element = new className(this);
-        this.elements.push(element);
-        return element;
-    }
-    setParams() {
-        let params = ['name', 'points', 'hp'];
-        let value = [this.name, this.points, this.hp];
-        params.forEach((e, i) => {
-            $(`#${e}`).html(value[i]);
-        })
-    }
-    start(){
-        this.loop();
-        
-    }
+
     loop() {
         requestAnimationFrame(() => {
             if(!this.pause){
                 this.counterForTimer++;
-            if (this.counterForTimer % 60 === 0) {
-                this.timer();
-                this.randomFruitGenerate();
-            }
-            if (this.hp <= 0) {
-                this.end();
-            }
-            $('.pause').css('display', 'none'). hide().fadeOut();
-            this.updateElements();
-            this.setParams();
-            } else if (this.pause){
-                $('.pause').css('display', 'flex'). hide().fadeIn();
-            }
-            if (this.ended) {
-                this.loop();
-            }
+            
+                if(this.counterForTimer % 60 === 0) {
+                    this.timer();
+                    this.randomFruitGenerate();
+                }
+                if (this.hp <= 0) {
+                    this.end();
+                }
+                $('.pause').css('display', 'none').hide().fadeOut();
+                if(!this.ended) {
+                    this.loop();
+                }
+                this.updateElements();
+                this.setParams();
+            } 
+            else if (this.pause) {
+                $('.pause').css('display', 'flex').show().fadeIn();
+            } 
         })
     }
-    end(){
+
+    end() {
         this.ended = true;
         let time = this.time;
         if (time.s1 >= 1 || time.m2 >= 1 || time.m1 >= 1) {
-            $(`#playerName`).html(`Поздравляем, ${this.name}!`);
-            $(`#endTime`).html(`Ваше время:, ${this.m1}${this.m2}:${this.s1}${this.s2}`);
-            $(`#collectedFruits`).html(`Вы собрали:, ${this.points}фруктов`);
-            $(`#congratulation`).html(`Вы выиграли!`);
-        }else{
-            $(`#playerName`).html(`Жаль, ${this.name}!`);
-            $(`#endTime`).html(`Ваше время:, ${this.m1}${this.m2}:${this.s1}${this.s2}`);
-            $(`#collectedFruits`).html(`Вы собрали:, ${this.points}фруктов`);
-            $(`#congratulation`).html(`Вы проиграли!`);
+            $('#playerName').html(`Поздравляем, ${this.name}!`);
+            $('#endTime').html(`Ваше время: ${time.m1}${time.m2}:${time.s1}${time.s2}`);
+            $('#collectedFruits').html(`Вы собрали ${this.points} фруктов`);
+            $('#congratulation').html(`Вы выиграли!`);
+        } else {
+            $('#playerName').html(`жаль, ${this.name}!`);
+            $('#endTime').html(`Ваше время: ${time.m1}${time.m2}:${time.s1}${time.s2}`);
+            $('#collectedFruits').html(`Вы собрали ${this.points} фруктов`);
+            $('#congratulation').html(`Вы проиграли!`);
         }
-        go ('end', 'panel d-flex justify-content-center align-items-center');
+        go('end', 'panel d-flex justify-content-center align-items-center');
     }
-    randomFruitGenerate() {
-        let ranFruit = random(0, 2);
-        this.generate(this.fruits[ranFruit]);
-    } 
-    remove(el) {
-        let idx = this.element.indexOf(el);
-        if (idx !== -1) {
-            this.elements.splice(idx, 1);
-        }
-        return faise;
-    }
+
     timer() {
         let time = this.time;
         time.s2++;
-        if (timw.s2 >= 10) {
+        if(time.s2 >= 10) {
             time.s2 = 0;
-            time.s1++
+            time.s1++;
         }
-        if (timw.s1 >= 10) {
+        if(time.s1 >= 6) {
             time.s1 = 0;
-            time.m1++
+            time.m2++;
         }
-        if (timw.m2 >= 10) {
+        if(time.m2 >= 10) {
             time.m2 = 0;
-            time.m1++
+            time.m1++;
         }
         let str = `${time.m1}${time.m2}:${time.s1}${time.s2}`;
         $("#timer").html(str);
+    }
+
+    randomFruitGenerate() {
+        let ranFruit = random(0, 2);
+        this.generate(this.fruits[ranFruit]);
+    }
+
+    setParams() {
+        let params = ['name', 'points', 'hp'];
+        let value = [this.name, this.points, this.hp];
+    
+        params.forEach((e, i) => {
+            $(`#${e}`).html(value[i]);
+        })
+    }
+
+    remove(el) {
+        let idx = this.elements.indexOf(el);
+        if(idx !== -1) {
+            this.elements.splice(idx, 1);
+            return true;
+        }else{
+            return false;
+        }
+
+        
+    }
+
+    removeElement() {
+        this.$element.remove();
+    }
+
+    updateElements() {
+        this.elements.forEach(e => {
+            e.update();
+            e.draw();
+        })   
+    }
+
+    generate(className) {
+        let element = new className(this);
+        this.elements.push(element);
+        return element;
     }
 }
 
@@ -159,9 +178,6 @@ class Drawable {
             y2: element.y + element.h,  
         };
         return a.x1 < b.x2 && b.x1 < a.x1 && a.y1 < b.y2 && b.y1 < a.y2;
-    }
-    removeElement() {
-        this.$element.remove();
     }
 }
 
@@ -223,7 +239,7 @@ class Player extends Drawable {
             if (this.game.elements[i].x < this.x + (this.w / 2)){
                 this.game.elements[i].x += 15;
             } else if (this.game.elements[i].x > this.x + (this.w / 2)) {
-                this.game.elements[i].x -=15;
+                this.game.elements[i].x -= 15;
             } 
         }
     }
@@ -251,23 +267,18 @@ class Fruits extends Drawable {
     takePoint(){
         if (this.game.remove(this)) {
             this.removeElement();
+            this.$element.remove();
             this.game.points++;
         }
     }
     takeDamage() {
         if (this.game.remove(this)) {
             this.removeElement();
+            this.$element.remove();
             this.game.hp--;
         }
     }
 }
-
-let random = (min, max) => {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-};
 
 class Apple extends Fruits {
     constructor(game) {
@@ -279,6 +290,7 @@ class Apple extends Fruits {
 class Banana extends Fruits {
     constructor(game) {
         super(game);
+        this.offsets.y = 4;
     }
 }
 
